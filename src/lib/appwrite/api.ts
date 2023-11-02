@@ -1,6 +1,6 @@
 import { ID, Query } from "appwrite";
-import { INewUser } from "../../types";
-import { account, appwriteConfig, avatars, databases } from "./config";
+import { INewPost, INewUser } from "../../types";
+import { account, appwriteConfig, avatars, storage, databases } from "./config";
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -46,8 +46,6 @@ export async function saveUserToDB(user: {
   }
 }
 
-// 1:39:21
-
 export async function signInAccount(user: { email: string; password: string }) {
   try {
     const session = await account.createEmailSession(user.email, user.password);
@@ -88,6 +86,111 @@ export async function signOutAccount() {
   try {
     const session = await account.deleteSession("current");
     return session;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// Upload file
+
+export async function uploadFile(file:File) {
+  try {
+    const uploadFile = storage.createFile(
+      appwriteConfig.storageId,
+      ID.unique(),
+      file
+    );
+    return uploadFile;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// Get file url
+
+// const fileUrl = storage.getFilePreview(
+//   appwriteConfig.storageId, - id
+//   fileId, - file id 
+//   2000, - ширина
+//   2000, - высота
+//   "top", - где будет размещено
+//   100, - качество
+// )
+
+export async function getFilePreview(fileId: string) {
+  try {
+    const fileUrl = storage.getFilePreview(
+      appwriteConfig.storageId,
+      fileId,
+      2000,
+      2000,
+      "top",
+      100,
+    )
+    if(!fileUrl) throw Error;
+    return fileUrl;
+  } catch (error) {
+    console.log(error);
+  }
+} 
+
+// Delete file
+
+export async function deleteFile(fileId: string) {
+    try {
+      await storage.deleteFile(appwriteConfig.storageId, fileId);
+      return { status: "ok" };
+    } catch (error) {
+      console.log(error);
+    }
+}
+
+export async function createPost(post: INewPost) {
+    try {
+      const uploadedFile = await uploadFile(post.file[0]);
+      if(!uploadedFile) throw Error;
+      const fileUrl = getFilePreview(uploadedFile.$id);
+      if(!fileUrl) {
+        await deleteFile(uploadedFile.$id);
+        throw Error;
+      }
+      const tags = post.tags?.replace(/ /g, "").split(",") || [];
+      
+      const newPost = await databases.createDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.postCollectionId,
+        ID.unique(),
+        {
+          creator: post.userId,
+          caption: post.caption,
+          imageUrl: fileUrl,
+          imageId: uploadedFile.$id,
+          location: post.location,
+          tags: tags,
+        }
+      );
+      if(!newPost) {
+        await deleteFile(uploadedFile.$id);
+        throw Error;
+      }
+      return newPost;
+    } catch (error) {
+      console.log(error);
+    }
+}
+
+// Чтобы читать и запрашивать данные используй listDocuments 
+// databases.listDocuments
+
+export async function getRecentPosts() {
+  try {
+    const posts = databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [
+        Query.orderDesc('$createdAt')
+      ]
+    )
   } catch (error) {
     console.log(error);
   }
