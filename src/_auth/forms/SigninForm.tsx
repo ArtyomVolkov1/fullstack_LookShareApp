@@ -15,16 +15,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { SigninSchema } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
-import {
-  useSignInAccount,
-} from "@/lib/react-query/queriesAndMutations";
+import { useSignInAccount } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/customHook";
 
 const SigninForm = () => {
   const { toast } = useToast();
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
-  const { mutateAsync: signInAccount} = useSignInAccount();
+  const { mutateAsync: signInAccount } = useSignInAccount();
   const form = useForm<z.infer<typeof SigninSchema>>({
     resolver: zodResolver(SigninSchema),
     defaultValues: {
@@ -39,7 +37,7 @@ const SigninForm = () => {
       password: values.password,
     });
     if (!session) {
-      return toast({ title: "Не получилось. Попробуйте еще раз!" });
+      return toast({ title: "Упс... похоже вы не зарегистрированы " });
     }
     const isLoggedIn = await checkAuthUser();
 
@@ -47,22 +45,30 @@ const SigninForm = () => {
       form.reset();
       navigate("/");
     } else {
-      return toast({ title: "Не получилось. Попробуйте еще раз!" });
+      toast({ title: "Не получилось. Попробуйте еще раз!" });
+      return;
     }
   }
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
-        <h2 className=" flex-center h3-bold text-center"><img className="float-left " src="./assets/images/logo-ls.svg" alt="logo" />L&S</h2>
-        <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
+        <h2 className=" flex-center h3-bold text-center">
+          <img
+            className="float-left "
+            src="./assets/images/logo-ls.svg"
+            alt="logo"
+          />
+          L&S
+        </h2>
+        <h2 className="h3-bold md:h2-bold pt-5 sm:pt-5">
           Войдите в ваш аккаунт
         </h2>
-        <p className="text-light-3 small-medium md:base-regular mt-2">
+        <p className="text-light-3 text-center small-medium md:base-regular mt-2">
           Добро пожаловать в L&S введите ваши данные
         </p>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-5 w-full mt-4"
+          className="flex flex-col gap-5 w-11/12 mt-4"
         >
           <FormField
             control={form.control}
@@ -105,8 +111,9 @@ const SigninForm = () => {
               <div className="flex-center gap-2">
                 <Loader /> Загрузка...
               </div>
-            ) :
-              "Войти" }
+            ) : (
+              "Войти"
+            )}
           </Button>
           <p className="text-small-regular text-light-2 text-center mt-2">
             Нет аккаунта? Ошибка!
@@ -114,7 +121,7 @@ const SigninForm = () => {
               to="/sign-up"
               className="text-primary-500 text-small-semibold ml-1"
             >
-              Не зарегистрировался? Фатальная ошибка! 
+              Не зарегистрировался? Фатальная ошибка!
             </Link>
           </p>
         </form>

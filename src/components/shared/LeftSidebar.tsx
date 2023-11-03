@@ -5,12 +5,22 @@ import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/customHook";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
+import { INITIAL_USER } from "@/context/AuthContext";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { mutate: signOut, isSuccess } = useSignOutAccount();
-  const { user } = useUserContext();
+  const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
+
+  const handleSignOut = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    signOut();
+    setIsAuthenticated(false);
+    setUser(INITIAL_USER);
+    navigate("/sign-in");
+  };
+
   return (
     <nav className="leftsidebar">
       <div className="flex flex-col gap-11">
@@ -22,7 +32,7 @@ const LeftSidebar = () => {
             height={100}
           />
         </Link>
-        <Link to={`/profile/${user.id}`} className="flex gap-3 items-center">
+        <Link to={'/'} className="flex gap-3 items-center">
           <img
             src={user.imageUrl || "assets/icons/profile-placeholder.svg"}
             alt="profile"
@@ -64,7 +74,7 @@ const LeftSidebar = () => {
       <Button
         variant="ghost"
         className="shad-button_ghost"
-        onClick={() => signOut()}
+        onClick={(e) => handleSignOut(e)}
       >
         <img src="/assets/icons/logout.svg" alt="logout" />
         <p className="small-medium lg:base-medium">Выйти</p>

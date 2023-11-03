@@ -23,8 +23,8 @@ import { useUserContext } from "@/context/customHook";
 
 const SignupForm = () => {
   const { toast } = useToast();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
     useCreateUserAccount();
   const { mutateAsync: signInAccount, isPending: isSigningIn } =
@@ -39,31 +39,37 @@ const SignupForm = () => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof SignUpSchema>) {
-    const newUser = await createUserAccount(values);
-    console.log(newUser);
-    if (!newUser) {
-      toast({
-        title: "Не получилось. Попробуйте еще раз!",
-      });
-      return;
-    }
-    const session = await signInAccount({
-      email: values.email,
-      password: values.password,
-    });
-    if (!session) {
-      return toast({ title: "Не получилось. Попробуйте еще раз!" });
-    }
-    const isLoggedIn = await checkAuthUser();
+const handleSignup = async (user: z.infer<typeof SignUpSchema>) => {
+    try {
+      const newUser = await createUserAccount(user);
 
-    if (isLoggedIn) {
-      form.reset();
-      navigate("/");
-    } else {
-      return toast({ title: "Не получилось. Попробуйте еще раз!" });
+      if (!newUser) {
+        toast({ title: "Не получилось. Попробуйте еще раз!", });
+        
+        return;
+      }
+      const session = await signInAccount({
+        email: user.email,
+        password: user.password,
+      });
+      if (!session) {
+        toast({ title: "Этот аккаунт уже существует. Попробуйте войти" });
+        navigate("/sign-in");
+        return 
+      }
+      const isLoggedIn = await checkAuthUser();
+      if (isLoggedIn) {
+        form.reset();
+        navigate("/");
+      } else {
+        toast({ title: "Не получилось. Попробуйте еще раз!" });
+        return;
+      } 
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
+
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
@@ -76,7 +82,7 @@ const SignupForm = () => {
           Чтобы пользоваться L&S введите ваши данные
         </p>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSignup)}
           className="flex flex-col gap-5 w-full mt-4"
         >
           <FormField
@@ -152,7 +158,7 @@ const SignupForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isCreatingAccount ? (
+            {isCreatingAccount || isSigningIn || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Загрузка...
               </div>

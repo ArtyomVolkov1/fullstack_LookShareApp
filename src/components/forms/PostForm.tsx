@@ -16,19 +16,25 @@ import { Textarea } from "@/components/ui/textarea";
 import FileUploader from "@/components/shared/FileUploader";
 import { PostSchema } from "@/lib/validation";
 import { Models } from "appwrite";
-import { useCreatePost } from "@/lib/react-query/queriesAndMutations";
+import {
+  useCreatePost,
+  useUpdatePost,
+} from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/customHook";
 import { toast, useToast } from "../ui/use-toast";
 
 type PostFromProps = {
-    post?: Models.Document;
-}
+  post?: Models.Document;
+  action: "Create" | "Update";
+};
 
-const PostForm = ({ post }: PostFromProps) => {
+const PostForm = ({ post, action }: PostFromProps) => {
+  const { mutateAsync: createPost, isPending: isLoadingCreate } =
+    useCreatePost();
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdatePost();
 
-  const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
-
-  const { user } = useUserContext();  
+  const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof PostSchema>>({
@@ -37,12 +43,27 @@ const PostForm = ({ post }: PostFromProps) => {
       caption: post ? post?.caption : "",
       file: [],
       location: post ? post?.location : "",
-      tags: post ? post.tags.join(',') : "",
+      tags: post ? post.tags.join(",") : "",
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof PostSchema>) {
+    if (post && action === "Update") {
+      const updatedPost = await updatePost({
+        ...values,
+        postId: post.$id,
+        imageId: post?.imageId,
+        imageUrl: post?.imageUrl,
+      });
+      if (!updatedPost) {
+        toast({
+          title: "Пожалуйста, попробуйте еще раз!",
+        });
+      }
+      return navigate(`/posts/${post.$id}`);
+    }
+
     const newPost = await createPost({
       ...values,
       userId: user.id,
@@ -50,9 +71,9 @@ const PostForm = ({ post }: PostFromProps) => {
     if (!newPost) {
       toast({
         title: "Попробуйте еще раз",
-      })
+      });
     }
-    navigate('/');
+    navigate("/");
   }
 
   return (
@@ -88,10 +109,10 @@ const PostForm = ({ post }: PostFromProps) => {
             <FormItem>
               <FormLabel className="shad-form_label">Добавь фото</FormLabel>
               <FormControl>
-                <FileUploader 
-                fieldChange={field.onChange}
-                mediaUrl={post?.imageUrl}
-                 />
+                <FileUploader
+                  fieldChange={field.onChange}
+                  mediaUrl={post?.imageUrl}
+                />
               </FormControl>
               <FormMessage className="shad-form_message" />
             </FormItem>
@@ -133,8 +154,17 @@ const PostForm = ({ post }: PostFromProps) => {
           )}
         />
         <div className="flex gap-4 items-center justify-end">
-          <Button type="button" className="shad-button_dark_4">Отмена</Button>
-          <Button type="submit" className="shad-button_primary whitespace-nowrap">Опубликовать</Button>
+          <Button type="button" className="shad-button_dark_4">
+            Отмена
+          </Button>
+          <Button
+            type="submit"
+            className="shad-button_primary whitespace-nowrap"
+            disabled={isLoadingCreate || isLoadingUpdate}
+          >
+            {isLoadingCreate || isLoadingUpdate && 'Загрузка...'}
+            {action} post
+          </Button>
         </div>
       </form>
     </Form>
