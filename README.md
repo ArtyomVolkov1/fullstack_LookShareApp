@@ -12,7 +12,7 @@ Look&Share - упрощенное приложение для обмена фо�
 - Есть адаптив до 320px;
 
 ## 🔭 Preview
-Click to go ...
+Click to go [LookShare](https://fullstack-look-share-app-new.vercel.app/sign-in)
 
 ### 🔜 Cooming soon
 
