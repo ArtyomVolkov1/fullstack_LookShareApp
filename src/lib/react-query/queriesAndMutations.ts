@@ -2,7 +2,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  useInfiniteQuery,
+  // useInfiniteQuery,
 } from "@tanstack/react-query";
 import {
   createUserAccount,
@@ -40,6 +40,13 @@ export const useSignOutAccount = () => {
   });
 };
 
+export const useGetRecentPosts = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+    queryFn: getRecentPosts,
+  });
+};
+
 export const useCreatePost = () => {
   const queryCLient = useQueryClient();
   return useMutation({
@@ -52,10 +59,23 @@ export const useCreatePost = () => {
   });
 };
 
-export const useGetRecentPosts = () => {
+export const useGetPostById = (postId?: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
-    queryFn: getRecentPosts,
+    queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
+    queryFn: () => getPostById(postId),
+    enabled: !!postId,
+  });
+};
+
+export const useUpdatePost = () => {
+  const queryCLient = useQueryClient();
+  return useMutation({
+    mutationFn: (post: IUpdatePost) => updatePost(post),
+    onSuccess: (data) => {
+      queryCLient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
+      });
+    },
   });
 };
 
@@ -71,7 +91,6 @@ export const useDeletePost = () => {
     },
   });
 };
-
 
 export const useLikePost = () => {
   const queryCLient = useQueryClient();
@@ -141,25 +160,5 @@ export const useGetCurrentUser = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_CURRENT_USER],
     queryFn: getCurrentUser,
-  });
-};
-
-export const useGetPostById = (postId?: string) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.GET_POST_BY_ID],
-    queryFn: () => getPostById(postId),
-    enabled: !!postId,
-  });
-};
-
-export const useUpdatePost = () => {
-  const queryCLient = useQueryClient();
-  return useMutation({
-    mutationFn: (post: IUpdatePost) => updatePost(post),
-    onSuccess: (data) => {
-      queryCLient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
-      });
-    },
   });
 };

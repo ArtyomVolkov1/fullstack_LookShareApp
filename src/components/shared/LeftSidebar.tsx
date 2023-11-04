@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
@@ -10,8 +9,8 @@ import { INITIAL_USER } from "@/context/AuthContext";
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { mutate: signOut, isSuccess } = useSignOutAccount();
-  const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
+  const { mutate: signOut } = useSignOutAccount();
+  const { user, setUser, setIsAuthenticated} = useUserContext();
 
   const handleSignOut = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
@@ -25,12 +24,13 @@ const LeftSidebar = () => {
     <nav className="leftsidebar">
       <div className="flex flex-col gap-11">
         <Link to="/" className="flex gap-3 items-center">
-          <img
+          {/* <img
             src="./assets/images/logo-ls.svg"
             alt="logo"
             width={70}
             height={100}
-          />
+          /> */}
+          <h2 className="h2-bold">L&S</h2>
         </Link>
         <Link to={'/'} className="flex gap-3 items-center">
           <img

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
 import { Models } from "appwrite";
+import { useState, useEffect } from "react";
+import { checkIsLiked } from "@/lib/utils";
 import {
   useDeleteSavePost,
   useGetCurrentUser,
   useLikePost,
   useSavePost,
 } from "@/lib/react-query/queriesAndMutations";
-import { checkIsLiked } from "@/lib/utils";
 
 type PostStatsProps = {
   post: Models.Document;
@@ -14,7 +14,7 @@ type PostStatsProps = {
 };
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
-  const likesList = post?.likes.map((user: Models.Document) => user.$id);
+  const likesList = post.likes.map((user: Models.Document) => user.$id);
   const [likes, setLikes] = useState<string[]>(likesList);
   const [isSaved, setIsSaved] = useState(false);
   const { mutate: likePost } = useLikePost();
@@ -34,8 +34,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   ) => {
     e.stopPropagation();
     let likesArray = [...likes];
-    const hasLiked = likesArray.includes(userId);
-    if (hasLiked) {
+    if (likesArray.includes(userId)) {
       likesArray = likesArray.filter((Id) => Id !== userId);
     } else {
       likesArray.push(userId);
@@ -43,6 +42,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     setLikes(likesArray);
     likePost({ postId: post.$id, likesArray });
   };
+
   const handleSavePost = (
     e: React.MouseEvent<HTMLImageElement, MouseEvent>
   ) => {
@@ -51,11 +51,9 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
       setIsSaved(false);
       return deleteSavePost(savedPostRecord.$id);
     }
-    savePost({ userId: userId, postId: post.$id});
+    savePost({ userId: userId, postId: post.$id });
     setIsSaved(true);
   };
-
-  useEffect(() => {}, []);
   return (
     <div className="flex justify-between items-center z-20">
       <div className="flex gap-2 mr-5">

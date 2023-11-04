@@ -1,7 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Models } from "appwrite";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,17 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { PostSchema } from "@/lib/validation";
+import { useToast } from "../ui/use-toast";
+import { useUserContext } from "@/context/customHook";
 import { Input } from "../ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FileUploader from "@/components/shared/FileUploader";
-import { PostSchema } from "@/lib/validation";
-import { Models } from "appwrite";
 import {
   useCreatePost,
   useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
-import { useUserContext } from "@/context/customHook";
-import { toast, useToast } from "../ui/use-toast";
 
 type PostFromProps = {
   post?: Models.Document;
@@ -29,57 +29,60 @@ type PostFromProps = {
 };
 
 const PostForm = ({ post, action }: PostFromProps) => {
-  const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreatePost();
-  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
-    useUpdatePost();
-
-  const { user } = useUserContext();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useUserContext();
   const form = useForm<z.infer<typeof PostSchema>>({
     resolver: zodResolver(PostSchema),
     defaultValues: {
       caption: post ? post?.caption : "",
       file: [],
-      location: post ? post?.location : "",
+      location: post ? post.location : "",
       tags: post ? post.tags.join(",") : "",
     },
   });
+  const { mutateAsync: createPost, isPending: isLoadingCreate } =
+    useCreatePost();
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdatePost();
 
-  // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof PostSchema>) {
+
+  const handleSubmit = async (value: z.infer<typeof PostSchema>) => {
     if (post && action === "Update") {
       const updatedPost = await updatePost({
-        ...values,
+        ...value,
         postId: post.$id,
-        imageId: post?.imageId,
-        imageUrl: post?.imageUrl,
+        imageId: post.imageId,
+        imageUrl: post.imageUrl,
       });
+
       if (!updatedPost) {
         toast({
-          title: "Пожалуйста, попробуйте еще раз!",
+          title: `${action} post failed. Please try again.`,
         });
+        console.log(updatedPost)
       }
-      return navigate(`/posts/${post.$id}`);
+      return navigate('/');
+      // navigate(`/posts/${post.$id}`);
     }
 
     const newPost = await createPost({
-      ...values,
+      ...value,
       userId: user.id,
     });
+
     if (!newPost) {
       toast({
-        title: "Попробуйте еще раз",
+        title: `${action} post failed. Please try again.`,
       });
     }
     navigate("/");
-  }
+  };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="flex flex-col gap-9 w-full max-w-5xl"
       >
         <FormField
@@ -154,7 +157,11 @@ const PostForm = ({ post, action }: PostFromProps) => {
           )}
         />
         <div className="flex gap-4 items-center justify-end">
-          <Button type="button" className="shad-button_dark_4">
+          <Button
+            type="button"
+            className="shad-button_dark_4"
+            onClick={() => navigate(-1)}
+          >
             Отмена
           </Button>
           <Button
@@ -162,7 +169,7 @@ const PostForm = ({ post, action }: PostFromProps) => {
             className="shad-button_primary whitespace-nowrap"
             disabled={isLoadingCreate || isLoadingUpdate}
           >
-            {isLoadingCreate || isLoadingUpdate && 'Загрузка...'}
+            {(isLoadingCreate || isLoadingUpdate) && "Загрузка..."}
             {action} post
           </Button>
         </div>

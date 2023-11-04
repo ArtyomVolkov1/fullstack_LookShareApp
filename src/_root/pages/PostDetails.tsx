@@ -12,7 +12,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 const PostDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: post, isPending } = useGetPostById(id || "");
+  const { data: post, isPending }: any = useGetPostById(id);
   const { user } = useUserContext();
   const { mutate: deletePost } = useDeletePost();
   const handleDeletePost = () => {
@@ -21,6 +21,21 @@ const PostDetails = () => {
   };
   return (
     <div className="post_details-container">
+      <div className="hidden md:flex max-w-5xl w-full">
+        <Button
+          onClick={() => navigate(-1)}
+          variant="ghost"
+          className="shad-button_ghost"
+        >
+          <img
+            src={"/assets/icons/back.svg"}
+            alt="back"
+            width={24}
+            height={24}
+          />
+          <p className="small-medium lg:base-medium">Back</p>
+        </Button>
+      </div>
       {isPending ? (
         <Loader />
       ) : (
@@ -94,8 +109,8 @@ const PostDetails = () => {
             <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
               <p>{post?.caption}</p>
               <ul className="flex gap-1 mt-2">
-                {post?.tags.map((tag: string) => (
-                  <li key={tag} className="text-light-3">
+                {post?.tags.map((tag: string, index: string) => (
+                  <li key={`${tag}${index}`} className="text-light-3">
                     #{tag}
                   </li>
                 ))}

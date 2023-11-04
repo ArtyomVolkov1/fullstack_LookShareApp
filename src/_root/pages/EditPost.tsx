@@ -5,9 +5,14 @@ import Loader from "@/components/shared/Loader";
 
 const EditPost = () => {
   const { id } = useParams();
-  const { data: post, isPending } = useGetPostById(id || "");
+  const { data: post, isPending } = useGetPostById(id);
 
-  if (isPending) return <Loader />;
+  if (isPending)
+    return (
+      <div className="flex-center w-full h-full">
+        <Loader />
+      </div>
+    );
   return (
     <div className="flex flex-1">
       <div className="common-container">
@@ -20,7 +25,7 @@ const EditPost = () => {
           />
           <h2 className="h3-bold md:h2-bold text-left w-full">Изменить пост</h2>
         </div>
-        <PostForm action="Update" post={post} />
+        {isPending ? <Loader /> : <PostForm action="Update" post={post} />}
       </div>
     </div>
   );
