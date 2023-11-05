@@ -58,7 +58,7 @@ const PostForm = ({ post, action }: PostFromProps) => {
 
       if (!updatedPost) {
         toast({
-          title: `${action} post failed. Please try again.`,
+          title: `${action} пост не получилось. Возможно вам доступен только просмотр.`,
         });
         console.log(updatedPost)
       }
@@ -73,7 +73,7 @@ const PostForm = ({ post, action }: PostFromProps) => {
 
     if (!newPost) {
       toast({
-        title: `${action} post failed. Please try again.`,
+        title: `${action} пост не получилось. Возможно вам доступен только просмотр.`,
       });
     }
     navigate("/");
