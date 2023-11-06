@@ -25,7 +25,7 @@ const EditPost = () => {
           />
           <h2 className="h3-bold md:h2-bold text-left w-full">Изменить пост</h2>
         </div>
-        {isPending ? <Loader /> : <PostForm action="Update" post={post} />}
+        {isPending ? <Loader /> : <PostForm action="Изменить" post={post} />}
       </div>
     </div>
   );

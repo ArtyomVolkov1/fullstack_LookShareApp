@@ -25,7 +25,7 @@ import {
 
 type PostFromProps = {
   post?: Models.Document;
-  action: "Create" | "Update";
+  action: "Создать" | "Изменить";
 };
 
 const PostForm = ({ post, action }: PostFromProps) => {
@@ -48,7 +48,7 @@ const PostForm = ({ post, action }: PostFromProps) => {
 
 
   const handleSubmit = async (value: z.infer<typeof PostSchema>) => {
-    if (post && action === "Update") {
+    if (post && action === "Изменить") {
       const updatedPost = await updatePost({
         ...value,
         postId: post.$id,
@@ -170,7 +170,7 @@ const PostForm = ({ post, action }: PostFromProps) => {
             disabled={isLoadingCreate || isLoadingUpdate}
           >
             {(isLoadingCreate || isLoadingUpdate) && "Загрузка..."}
-            {action} post
+            {action} пост
           </Button>
         </div>
       </form>

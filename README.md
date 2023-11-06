@@ -13,3 +13,4 @@ Look&Share - упрощенное приложение для обмена фо�
 
 ## 🔭 Preview
 Click to go ...
+Guest Account: guest@guest.com, guest12345
