@@ -14,4 +14,6 @@ Look&Share - упрощенное приложение для обмена фо�
 ## 🔭 Preview
 Click to go [Look&Share](https://fullstack-look-share-app.vercel.app/sign-in)
 
-Guest Account: guest@guest.com, guest12345
+Guest Account: 
+- Fake Mail: guest@guest.com
+- Password: guest12345
