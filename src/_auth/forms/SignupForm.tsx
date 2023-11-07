@@ -74,7 +74,7 @@ const handleSignup = async (user: z.infer<typeof SignUpSchema>) => {
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
         <h2 className="flex-center h3-bold text-center">
-        <img className="float-left " src="./assets/images/logo-ls.svg" alt="logo" />L&S</h2>
+        <img className="float-left " src="./assets/images/LS_logo.svg" alt="logo" /></h2>
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
           Создайте новый аккаунт
         </h2>

@@ -55,10 +55,9 @@ const SigninForm = () => {
         <h2 className=" flex-center h3-bold text-center">
           <img
             className="float-left "
-            src="./assets/images/logo-ls.svg"
+            src="./assets/images/LS_logo.svg"
             alt="logo"
           />
-          L&S
         </h2>
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-5">
           Войдите в ваш аккаунт
